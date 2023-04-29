@@ -18,17 +18,21 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 import sqlite3
 import csv
 from config import *
+from pathlib import Path
 
 def get_csv_data(csv_file):
     """
     file must have column names on first row.
     return columns and data separately, in a dict.
     """
+    csv_file = Path(csv_file)
+    table_name = csv_file.stem
+
     with open(csv_file,"r",encoding="utf-8") as f:
         reader=csv.reader(f)
         csv_data = [row for row in reader]
     columns = csv_data.pop(0)
-    return {"columns":columns,"data":csv_data}
+    return {"name":table_name, "columns":columns,"data":csv_data}
 
 def create_table(db,table_name,columns):
     """
@@ -56,6 +60,20 @@ def create_table(db,table_name,columns):
         cur = conn.cursor()
         cur.execute(sql)
 
+def get_table_columns(db,table_name):
+    """
+    return a list of the column names in a table
+    """
+    sql = f"SELECT * FROM pragma_table_info('{table_name}')"
+    conn = sqlite3.connect(db)
+    with conn:
+        cur = conn.cursor()
+        cur.execute(sql)
+        pragma =  cur.fetchall()
+   
+    columns = [col[1] for col in pragma]
+    return columns
+
 def insert_records(db,table_name,columns, data):
 
     sql_insert = f"INSERT INTO {table_name} ("
@@ -75,9 +93,42 @@ def insert_records(db,table_name,columns, data):
         cur = conn.cursor()
         cur.executemany(sql, data)
 
+def query_all(db,table_name):
+    sql = f"SELECT * FROM {table_name};"
+    conn = sqlite3.connect(db)
+    with conn:
+        cur = conn.cursor()
+        cur.execute(sql)
+        data = cur.fetchall()
+    return data
 
-data = get_csv_data("us-500.csv")
-create_table(varDatabase, "contacts", data["columns"])
-insert_records(varDatabase, "contacts", data["columns"], data["data"])
+def update_record(db,table_name,record_id,row):
+    """
+    row = list of values for the update.
+    all rows get updated, even if there is no change.
+    """
+    columns = get_table_columns(db, table_name)
+    sql_update = f"UPDATE {table_name} SET "
+    sql_columns = ""
+    for n in range(1,len(columns)):
+        sql_columns += columns[n] + " = '" + row[n-1] + "'"        
+        if n < len(columns) - 1:
+            sql_columns += ", "
+    sql_columns += " "
+    sql_where = "WHERE ID = " + str(record_id) + ";"
+    sql = sql_update + sql_columns + sql_where
+    conn = sqlite3.connect(db)
+    with conn:
+        cur = conn.cursor()
+        cur.execute(sql)
+        conn.commit()
+
+def delete_record(db,table_name,record_id):
+    sql_delete = f"DELETE FROM {table_name} WHERE ID = {record_id};"
+    conn = sqlite3.connect(db)
+    with conn:
+        cur = conn.cursor()
+        cur.execute(sql_delete)
+        conn.commit() 
 
 
