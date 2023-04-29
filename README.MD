@@ -4,15 +4,15 @@
 Updated: 2023-04-29
 
 ## Introduction
-PyContacts is a contact manager.
+PyContacts is a contact manager based on Tkinter and SQLite.
 
-## Features
+## Features (in progress)
 - Stores data in a SQLite database
 - Import contacts from csv
 - Auto-create database tables
 - Add, edit delete contacts.
 
-### Feature Ideas
+### Features (possible future)
 - Color themes
 - Create Outlook emails
 - Export contacts to Outlook format
@@ -21,11 +21,14 @@ PyContacts is a contact manager.
 GNU General Public License 3. See the LICENSE file for details.
 
 ## Installation
+- TBA
 
-## Confguration
-
+## Configuration
+- TBA
+ 
 ## Screenshot
-
+- TBA
+- 
 ## Documentation
 
 ### Records

@@ -31,8 +31,12 @@ def get_csv_data(csv_file):
     with open(csv_file,"r",encoding="utf-8") as f:
         reader=csv.reader(f)
         csv_data = [row for row in reader]
-    columns = csv_data.pop(0)
-    return {"name":table_name, "columns":columns,"data":csv_data}
+    
+    columns_row = csv_data.pop(0)
+       
+
+    return {"name":table_name, "columns":columns_row,"data":csv_data}
+
 
 def create_table(db,table_name,columns):
     """
@@ -62,7 +66,8 @@ def create_table(db,table_name,columns):
 
 def get_table_columns(db,table_name):
     """
-    return a list of the column names in a table
+    return a list of the column names and 
+    maximum widths from a table
     """
     sql = f"SELECT * FROM pragma_table_info('{table_name}')"
     conn = sqlite3.connect(db)
@@ -71,7 +76,18 @@ def get_table_columns(db,table_name):
         cur.execute(sql)
         pragma =  cur.fetchall()
    
-    columns = [col[1] for col in pragma]
+    column_names = [col[1] for col in pragma]
+    table_data = query_all(db, table_name)
+
+    columns = {}
+
+    # Get max column widths based on content
+    for column in column_names:
+        max_width = 0
+        for row in table_data:
+            if len(str(row[column_names.index(column)])) > max_width:
+                max_width = len(str(row[column_names.index(column)]))
+        columns[column] = max_width
     return columns
 
 def insert_records(db,table_name,columns, data):
@@ -130,5 +146,3 @@ def delete_record(db,table_name,record_id):
         cur = conn.cursor()
         cur.execute(sql_delete)
         conn.commit() 
-
-
