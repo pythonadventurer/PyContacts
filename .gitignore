@@ -1,0 +1,6 @@
+*.pyc
+*.bat
+env/
+__pycache__/
+private/
+
