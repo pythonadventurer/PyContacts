@@ -118,6 +118,15 @@ def query_all(db,table_name):
         data = cur.fetchall()
     return data
 
+def query_record(db,table_name,record_id):
+    sql = f"SELECT * FROM {table_name} WHERE ID = {record_id};"
+    conn = sqlite3.connect(db)
+    with conn:
+        cur = conn.cursor()
+        cur.execute(sql)
+        data = cur.fetchone()
+    return data
+
 def update_record(db,table_name,record_id,row):
     """
     row = list of values for the update.
@@ -146,3 +155,5 @@ def delete_record(db,table_name,record_id):
         cur = conn.cursor()
         cur.execute(sql_delete)
         conn.commit() 
+
+

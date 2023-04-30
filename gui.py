@@ -85,19 +85,28 @@ class TableFrame(Frame):
         self.table_name = table_name
         self.columns = get_table_columns(self.db, self.table_name)
 
-        def insert_data():
+        def refresh():
+            # clear the treeview
+            treTable.delete(*treTable.get_children())
+
             table_data = query_all(self.db, self.table_name)
             count = 0
             for record in table_data:
-                treTable.insert(parent='', index='end', iid=count, text='', 
-                        values = record) 
-                # if count % 2 == 0:
-                #     treTable.insert(parent='', index='end', iid=count, text='', 
-                #         values = record, tags=('evenrow',))  
-                # else:
-                #     treTable.insert(parent='', index='end', iid=count, text='', 
-                #         values = record, tags=('oddrow',))  
+                # treTable.insert(parent='', index='end', iid=count, text='', 
+                #         values = record) 
+                if count % 2 == 0:
+                    treTable.insert(parent='', index='end', iid=count, text='', 
+                        values = record, tags=('evenrow',))  
+                else:
+                    treTable.insert(parent='', index='end', iid=count, text='', 
+                        values = record, tags=('oddrow',))  
                 count += 1
+
+        def open_record_form(e):
+            selection = treTable.focus()
+            item = treTable.item(selection)
+            record_id = item['values'][0]
+            f = RecordForm(varDatabase,"contacts",record_id)
 
         # frame to hold top row of buttons and search options
         fraToolbar = Frame(self)
@@ -136,8 +145,8 @@ class TableFrame(Frame):
                                 yscrollcommand=scrVertical.set)
 
         # # Create Striped Row Tags
-        # treTable.tag_configure('oddrow', background=varPrimaryColor,font=("Helvetica",12))
-        # treTable.tag_configure('evenrow', background=varSecondaryColor,font=("Helvetica",12))
+        treTable.tag_configure('oddrow', background=varPrimaryColor,font=("Helvetica",12))
+        treTable.tag_configure('evenrow', background=varSecondaryColor,font=("Helvetica",12))
 
         treTable.grid(row=1,column=0,sticky=(N,S,E,W))
 
@@ -151,17 +160,102 @@ class TableFrame(Frame):
         for col in treTable['columns']:
             treTable.column(col, width=self.columns[col] * 10,stretch=0) 
 
-        # # hide the ID column
-        treTable.column('ID',width=0,stretch=NO)
-        insert_data()
+        # hide the ID column
+        # treTable.column('ID',width=0,stretch=NO)
 
+        refresh()
+
+        # connect the scrollbars to the treeview
         scrHorizontal['command'] = treTable.xview
         scrVertical['command'] = treTable.yview
 
+        treTable.bind("<Double-1>",open_record_form)
+
+
+class RecordForm(Toplevel):
+    def __init__(self,db,table_name,record_id):
+        Toplevel.__init__ (self)
+        self.title("Record")
+        col_names = list(get_table_columns(db, table_name).keys())
+
+        def get_entry_widgets():
+            return [child for child in fraMain.children.keys() if "entry" in child]
+
+        def insert_data():
+            """
+            Get the data from the selected record and display it in the form.
+            """
+            # get the list of entry boxes
+            entry_widgets = get_entry_widgets()
+
+            data = query_record(db, table_name, record_id)
+            for n in range(0,len(entry_widgets)):
+                fraMain.children[entry_widgets[n]].insert(0,data[n])
+
+        def clear_form():
+            # make id editable so can be cleared
+
+            fraMain.children['!entry'].configure(state='normal')
+            entry_widgets = get_entry_widgets()
+            for n in range(0,len(entry_widgets)):
+                fraMain.children[entry_widgets[n]].delete(0,END)
+            # disable ID so user can't enter anything in it
+            fraMain.children['!entry'].configure(state='disabled')
+
+        def new_record():
+            clear_form()
+
+        def save_record():
+            # get the values from the entry widgets
+            data = []
+            entry_widgets = get_entry_widgets()
+            for n in range(0,len(entry_widgets)):
+                data.append(fraMain.children[entry_widgets[n]].get())
+
+            # data includes the ID, tuple omits it for entry/updating.
+            data_tuple = [tuple(data[1:])]
+
+            if data[0] == '':  # no id means it's a new record.
+                insert_records(db, table_name, col_names[1:], data_tuple)
+            else:  # has ID so update existing.
+                update_record(db, table_name, record_id, data_tuple) 
+
+        def delete_record():
+            pass
+
+        # toolbar to hold the buttons
+        fraToolbar = Frame(self)
+
+        btnNew = Button(fraToolbar,text="New",width=8,command=new_record)
+        btnSave = Button(fraToolbar,text="Save",width=8,command=save_record)
+        btnDelete = Button(fraToolbar,text="Delete",width=8,command=delete_record)
+        btnNew.grid(row=0,column=1,padx=5,pady=5,sticky=(W,E))
+        btnSave.grid(row=0,column=2,padx=5,pady=5,sticky=(W,E))
+        btnDelete.grid(row=0,column=3,padx=5,pady=5,sticky=(W,E))
+        fraToolbar.grid(row=0,column=0)
+
+        fraMain = Frame(self)
+
+        for n in range(0,len(col_names)):
+            Label(fraMain,text=col_names[n],font=("Helvetica",10,"bold")).grid(row=n,column=0,padx=5,pady=5,sticky=E)
+            Entry(fraMain,font=("Helvetica",10)).grid(row=n,column=1,padx=10,pady=5,sticky=(E,W))    
+
+        fraMain.grid(row=1,column=0)
+        insert_data()
+
+        # make ID field read-only
+        fraMain.children['!entry'].configure(state='disabled')
 
 
 
         
+
+
+
+
+
+
+
 
 
         

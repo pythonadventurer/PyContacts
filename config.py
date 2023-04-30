@@ -15,5 +15,16 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>
 """
-varAppVersion = "0.0.1"
-varDatabase = "contacts.db"
+
+from configparser import ConfigParser
+
+parser = ConfigParser()
+parser.read("config.ini")
+
+varAppVersion = parser.get("app","version")
+varDatabase = parser.get("app","database")
+
+varPrimaryColor = parser.get("colors","primary_color")
+varSecondaryColor = parser.get("colors","secondary_color")
+varHighlightColor = parser.get("colors","highlight_color")
+
