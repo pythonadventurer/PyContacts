@@ -27,16 +27,18 @@ GNU General Public License 3. See the LICENSE file for details.
 - TBA
  
 ## Screenshot
-- TBA
-- 
+![](screenshot.jpg)
+
 ## Documentation
+
+*Not all features are working yet!*
 
 ### Records
 - Double click a record --> Record form  
     - Record form --> (displays clicked record)  
         - Record form --> New (clears the form to add a new record)  
         - Record form --> Save (saves the record as displayed) -- with confirmation (Y/N)  
-        - Record form --> Selete (deletes the record displayed) -- with confirmation (Y/N)  
+        - Record form --> Delete (deletes the record displayed) -- with confirmation (Y/N)  
 
 ### Toolbar
 - Search By --> (select column to search)

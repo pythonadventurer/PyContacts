@@ -15,6 +15,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>
 """
+# TODO Use event bindings to refresh the main window when record form is closed.
+# TODO Fix entry widths in record form
+# TODO Search feature
+# TODO Sort feature
+# TODO Show-hide columns feature
 
 from tkinter import *
 from tkinter import ttk
@@ -194,11 +199,11 @@ class RecordForm(Toplevel):
 
         def clear_form():
             # make id editable so can be cleared
-
             fraMain.children['!entry'].configure(state='normal')
             entry_widgets = get_entry_widgets()
             for n in range(0,len(entry_widgets)):
                 fraMain.children[entry_widgets[n]].delete(0,END)
+
             # disable ID so user can't enter anything in it
             fraMain.children['!entry'].configure(state='disabled')
 
@@ -206,6 +211,12 @@ class RecordForm(Toplevel):
             clear_form()
 
         def save_record():
+            response = messagebox.askquestion("Confirm","Save this record?")
+            print(f"Response: {response}")
+
+            if response == "no":
+                return
+
             # get the values from the entry widgets
             data = []
             entry_widgets = get_entry_widgets()
@@ -213,15 +224,30 @@ class RecordForm(Toplevel):
                 data.append(fraMain.children[entry_widgets[n]].get())
 
             # data includes the ID, tuple omits it for entry/updating.
-            data_tuple = [tuple(data[1:])]
+            data_tuple = tuple(data[1:])
 
             if data[0] == '':  # no id means it's a new record.
                 insert_records(db, table_name, col_names[1:], data_tuple)
             else:  # has ID so update existing.
                 update_record(db, table_name, record_id, data_tuple) 
 
+            messagebox.showinfo("Change Successful","Record has been updated.")
+            exit()
+
         def delete_record():
-            pass
+            response = messagebox.askquestion("Confirm","Delete this record?")
+            print(f"Response: {response}")
+
+            if response == "no":
+                return
+
+            delete_record(db,table_name,record_id)
+
+            messagebox.showinfo("He's Dead, Jim","Record has been deleted.")
+            exit()
+
+        def exit():
+            self.destroy()
 
         # toolbar to hold the buttons
         fraToolbar = Frame(self)
@@ -251,7 +277,8 @@ class RecordForm(Toplevel):
         
 
 
-
+def get_child_widgets(object):
+    return [child for child in object.children.keys()]
 
 
 

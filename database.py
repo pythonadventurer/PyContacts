@@ -32,11 +32,9 @@ def get_csv_data(csv_file):
         reader=csv.reader(f)
         csv_data = [row for row in reader]
     
-    columns_row = csv_data.pop(0)
-       
+    columns_row = csv_data.pop(0)      
 
     return {"name":table_name, "columns":columns_row,"data":csv_data}
-
 
 def create_table(db,table_name,columns):
     """
@@ -132,7 +130,7 @@ def update_record(db,table_name,record_id,row):
     row = list of values for the update.
     all rows get updated, even if there is no change.
     """
-    columns = get_table_columns(db, table_name)
+    columns = [col for col in get_table_columns(db, table_name).keys()]
     sql_update = f"UPDATE {table_name} SET "
     sql_columns = ""
     for n in range(1,len(columns)):
