@@ -97,8 +97,6 @@ class TableFrame(Frame):
             table_data = query_all(self.db, self.table_name)
             count = 0
             for record in table_data:
-                # treTable.insert(parent='', index='end', iid=count, text='', 
-                #         values = record) 
                 if count % 2 == 0:
                     treTable.insert(parent='', index='end', iid=count, text='', 
                         values = record, tags=('evenrow',))  
@@ -141,7 +139,6 @@ class TableFrame(Frame):
         scrVertical = ttk.Scrollbar(self,orient=VERTICAL)
         scrVertical.grid(row=1,column=1,sticky=(N,S))
 
-
         treTable = ttk.Treeview(self, 
                                 columns=tuple(self.columns.keys()),
                                 show="headings",
@@ -175,6 +172,9 @@ class TableFrame(Frame):
         scrVertical['command'] = treTable.yview
 
         treTable.bind("<Double-1>",open_record_form)
+
+
+
 
 
 class RecordForm(Toplevel):
@@ -232,6 +232,7 @@ class RecordForm(Toplevel):
                 update_record(db, table_name, record_id, data_tuple) 
 
             messagebox.showinfo("Change Successful","Record has been updated.")
+           
             exit()
 
         def delete_record():
