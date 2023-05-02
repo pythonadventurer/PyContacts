@@ -40,6 +40,7 @@ class App:
         root.config(menu=mnuMain)
         table = TableFrame(root,varDatabase,"contacts")
         table.grid(row=0,column=0)
+        
 
 class MainMenu(Menu):
     def __init__(self,root):
@@ -109,7 +110,7 @@ class TableFrame(Frame):
             selection = treTable.focus()
             item = treTable.item(selection)
             record_id = item['values'][0]
-            f = RecordForm(varDatabase,"contacts",record_id)
+            f = RecordForm(varDatabase,"contacts",record_id,refresh)
 
         # frame to hold top row of buttons and search options
         fraToolbar = Frame(self)
@@ -173,11 +174,28 @@ class TableFrame(Frame):
 
         treTable.bind("<Double-1>",open_record_form)
 
+        print(self.children.keys())
+
+    # def requery(self):
+    #     # clear the treeview
+    #     treTable.delete(*treTable.get_children())
+
+    #     table_data = query_all(self.db, self.table_name)
+    #     count = 0
+    #     for record in table_data:
+    #         if count % 2 == 0:
+    #             treTable.insert(parent='', index='end', iid=count, text='', 
+    #                 values = record, tags=('evenrow',))  
+    #         else:
+    #             treTable.insert(parent='', index='end', iid=count, text='', 
+    #                 values = record, tags=('oddrow',))  
+    #         count += 1
 
 class RecordForm(Toplevel):
-    def __init__(self,db,table_name,record_id):
+    def __init__(self,db,table_name,record_id,func):
         Toplevel.__init__ (self)
         self.title("Record")
+        self.func = func
         col_names = list(get_table_columns(db, table_name).keys())
 
         def get_child_widgets(object):
@@ -247,7 +265,11 @@ class RecordForm(Toplevel):
             messagebox.showinfo("He's Dead, Jim","Record has been deleted.")
             exit()
 
+        def RefreshMainForm():
+            self.func()
+
         def exit():
+            RefreshMainForm()
             self.destroy()
 
         # toolbar to hold the buttons
@@ -272,3 +294,4 @@ class RecordForm(Toplevel):
 
         # make ID field read-only
         fraMain.children['!entry'].configure(state='disabled')
+
