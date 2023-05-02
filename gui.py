@@ -174,14 +174,14 @@ class TableFrame(Frame):
         treTable.bind("<Double-1>",open_record_form)
 
 
-
-
-
 class RecordForm(Toplevel):
     def __init__(self,db,table_name,record_id):
         Toplevel.__init__ (self)
         self.title("Record")
         col_names = list(get_table_columns(db, table_name).keys())
+
+        def get_child_widgets(object):
+            return [child for child in object.children.keys()]
 
         def get_entry_widgets():
             return [child for child in fraMain.children.keys() if "entry" in child]
@@ -272,19 +272,3 @@ class RecordForm(Toplevel):
 
         # make ID field read-only
         fraMain.children['!entry'].configure(state='disabled')
-
-
-
-        
-
-
-def get_child_widgets(object):
-    return [child for child in object.children.keys()]
-
-
-
-
-
-
-        
-        
